@@ -9,6 +9,9 @@ import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
 import os
+from scipy.misc import electrocardiogram
+from scipy.signal import find_peaks
+
 
 # Define dynamic calibration function 
 def convRightVals(data, calData):
@@ -50,22 +53,45 @@ def convRightVals(data, calData):
     return convValues
 
 # Read in files
-fPath = 'C:/Users/Daniel.Feeney/Dropbox (Boa)/Snow Protocol/InLabPressures/'
+fPath = 'C:/Users/Daniel.Feeney/Dropbox (Boa)/Snow Protocol/InLabPressures/SensoriaData/'
 entries = os.listdir(fPath)
 
 # Import data. Hard coded for now
-BOAfile = entries[0]
-boa = pd.read_csv(fPath+BOAfile,sep=',', skiprows = 17, header = 0)
+BOAfile = entries[5]
+boa = pd.read_csv(fPath+BOAfile,sep=',', skiprows = 19, header = 0)
 
-calFname = entries[1]
-cal = pd.read_csv(fPath+calFname,sep=',', skiprows = 17, header = 0)
+calFname = entries[10]
+cal = pd.read_csv(fPath+calFname,sep=',', skiprows = 19, header = 0)
 
-buckleFname = entries[2]
-buckle = pd.read_csv(fPath+buckleFname,sep=',', skiprows = 17, header = 0)
+buckleFname = entries[8]
+buckle = pd.read_csv(fPath+buckleFname,sep=',', skiprows = 19, header = 0)
 
 # Use dynamic calibration from above
 convBuckles = convRightVals(buckle, cal)
 convBoa = convRightVals(boa, cal)
+
+# Generic function to calculate peaks
+def avgPeaks(inputCol, ht, dist):
+    x = np.array(inputCol)
+    peaks, _ = find_peaks(x.flatten(), height=ht, distance = dist)
+    return x[peaks].mean()
+
+# find peaks for navicular, cuboid, and heel
+buckleNav = avgPeaks(convBuckles[['C3']], 45, 30)
+boaNav = avgPeaks(convBoa[['C3']], 45, 30)
+
+buckleCub = avgPeaks(convBuckles[['C7']], 25, 30)
+boaCub = avgPeaks(convBoa[['C7']], 45, 30)
+
+buckleHeel = avgPeaks(convBuckles[['C5']], 290, 30)
+boaHeel = avgPeaks(convBoa[['C5']], 290, 30)
+        
+## Optional plotting below to find cutoffs    
+#plt.plot(convBuckles[['C3']])
+#plt.plot(peaks, x[peaks], "x")
+#plt.plot(np.zeros_like(x), "--", color="gray")
+#plt.show()
+
 
 #order of sensors 0: 'Tibia', 1: '5th Met', 2: 'M Malleolus', 3:'Navicular', 4:'1st Met', 5:'Calcneus', 6:'L. Malleolus', 7:'Cuboid'
 # Make plots
