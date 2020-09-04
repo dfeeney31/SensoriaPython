@@ -13,7 +13,7 @@ from scipy.signal import find_peaks
 
 
 # Define dynamic calibration function 
-def convRightVals(data, calData):
+def convLeftVals(data, calData):
     #ConvRightVals Convert the Sensoria values to the correct scale using a manual
     #zero calibration. A,B,C,D all come from Sensoria calibration report.
     #Manual calibration requires the subject wear the sock but put their foot
@@ -28,14 +28,14 @@ def convRightVals(data, calData):
     # Hard code the baseline sensor data from Sensoria. 
     calFactor = (2.20462262/1000)/0.196349148;            #Provided by Sensoria 
     
-    A0cal = 43333480; B0cal = 1.006716; C0cal = -47705.61; D0cal = 867.9985;
-    A1cal = 197658400; B1cal = 1.42; C1cal = -14959.610000; D1cal = 785.0005197;
-    A2cal = 5014654000; B2cal = 1.95; C2cal = -11368.490000; D2cal = 781.0011045;
-    A3cal = 1159582000; B3cal = 1.66; C3cal = -19559.650000; D3cal = 756.00000728;
-    A4cal = 965842000; B4cal = 1.851143; C4cal = -4763.286; D4cal = 735.9987463;
-    A5cal = 173966200000; B5cal = 2.77; C5cal = -5534.230000; D5cal = 506.9997497;
-    A6cal = 28091580000000; B6cal = 3.68; C6cal = -2596.470000; D6cal = 533.9996174; 
-    A7cal = 485425400; B7cal = 1.59; C7cal = -15726.110000; D7cal = 677.0007279;
+    A0cal =  16086807437; B0cal = 2.148099; C0cal = -15033.534170; D0cal = 641;
+    A1cal = 2295412989; B1cal = 1.886191; C1cal = -10256.829160; D1cal = 686;
+    A2cal = 1180664527; B2cal = 1.656981; C2cal = -21312.794500; D2cal = 729;
+    A3cal = 8418427991; B3cal = 1.987871; C3cal = -16522.481680; D3cal = 743;
+    A4cal = 1542239230; B4cal = 1.723956; C4cal = -18247.250280; D4cal = 721;
+    A5cal = 6270000000000; B5cal = 3.134906; C5cal = -8430.332047; D5cal = 676;
+    A6cal =  39440040352; B6cal = 2.307837; C6cal = -13813.348140; D6cal = 627; 
+    A7cal = 1512411475; B7cal = 1.565646; C7cal = -39854.332850; D7cal = 841;
     
     
     convValuesCS0 = ((data.loc[:,"S0"] - (calData.loc[:,"S0"].mean() - D0cal)).pow(-B0cal).multiply(A0cal) + C0cal).multiply(calFactor)
@@ -53,20 +53,25 @@ def convRightVals(data, calData):
 
 # Read in files
 fPath = 'C:/Users/Daniel.Feeney/Dropbox (Boa)/EndurancePerformance/SalomonQuicklace_Aug2020/Joe_Pressure_Data/Sensoria/'
+fPath = 'C:/Users/Daniel.Feeney/Dropbox (Boa)/EndurancePerformance/SalomonQuicklace_Aug2020/Sean_Pressure_Data/'
 entries = os.listdir(fPath)
 
 # Import data. Hard coded for now
-BOAfile = entries[0]
+calFile = entries[0]
+cal = pd.read_csv(fPath+calFile,sep=',', skiprows = 19, header = 0)
+
+BOAfile = entries[3]
 boa = pd.read_csv(fPath+BOAfile,sep=',', skiprows = 19, header = 0)
 
-qlFile = entries[1]
+qlFile = entries[4]
 qlFile = pd.read_csv(fPath+qlFile,sep=',', skiprows = 19, header = 0)
 
-convBoa = boa
-convQL = qlFile
+#convBoa = boa
+#convQL = qlFile
+
 # Use dynamic calibration from above
-#convBuckles = convRightVals(buckle, cal)
-#convBoa = convRightVals(boa, cal)
+convQL = convLeftVals(qlFile, cal)
+convBoa = convLeftVals(boa, cal)
 
 # Generic function to calculate peaks
 def avgPeaks(inputCol, ht, dist):
@@ -75,17 +80,17 @@ def avgPeaks(inputCol, ht, dist):
     return x[peaks].mean()
 
 # find peaks for navicular, cuboid, and heel
-buckleNav = avgPeaks(convBuckles[['C3']], 45, 30)
-boaNav = avgPeaks(convBoa[['C3']], 45, 30)
+#buckleNav = avgPeaks(convBuckles[['C3']], 45, 30)
+#boaNav = avgPeaks(convBoa[['C3']], 45, 30)
 
-buckleCub = avgPeaks(convBuckles[['C7']], 25, 30)
-boaCub = avgPeaks(convBoa[['C7']], 45, 30)
+#buckleCub = avgPeaks(convBuckles[['C7']], 25, 30)
+#boaCub = avgPeaks(convBoa[['C7']], 45, 30)
 
-buckleHeel = avgPeaks(convBuckles[['C5']], 290, 30)
-boaHeel = avgPeaks(convBoa[['C5']], 290, 30)
+#buckleHeel = avgPeaks(convBuckles[['C5']], 290, 30)
+#boaHeel = avgPeaks(convBoa[['C5']], 290, 30)
         
-[boaNav, boaCub, boaHeel]
-[buckleNav, buckleCub, buckleHeel]
+#[boaNav, boaCub, boaHeel]
+#[buckleNav, buckleCub, buckleHeel]
 ## Optional plotting below to find cutoffs    
 #plt.plot(convBuckles[['C3']])
 #plt.plot(peaks, x[peaks], "x")
@@ -96,41 +101,41 @@ boaHeel = avgPeaks(convBoa[['C5']], 290, 30)
 #order of sensors 0: 'Tibia', 1: '5th Met', 2: 'M Malleolus', 3:'Navicular', 4:'1st Met', 5:'Calcneus', 6:'L. Malleolus', 7:'Cuboid'
 # Make plots
 f, (ax0, ax1, ax2) = plt.subplots(1,3)
-ax0.plot('CS0', data = convQL)
-ax0.plot('CS0', data = convBoa)
+ax0.plot('C0', data = convQL)
+ax0.plot('C0', data = convBoa)
 ax0.title.set_text('L 5th Ray')
 
-ax1.plot('CS2', data = convQL)
-ax1.plot('CS2', data = convBoa)
+ax1.plot('C2', data = convQL)
+ax1.plot('C2', data = convBoa)
 ax1.title.set_text('5th distal phalanx')
 
-ax2.plot('CS6', data = convQL)
-ax2.plot('CS6', data = convBoa)
+ax2.plot('C6', data = convQL)
+ax2.plot('C6', data = convBoa)
 ax2.title.set_text('1st distal phalanx')
 plt.tight_layout()
 
 f, (ax0, ax1, ax2) = plt.subplots(1,3)
-ax0.plot('CS3', data = convQL)
-ax0.plot('CS3', data = convBoa)
+ax0.plot('C3', data = convQL)
+ax0.plot('C3', data = convBoa)
 ax0.title.set_text('1st MTP')
 
-ax1.plot('CS7', data = convQL)
-ax1.plot('CS7', data = convBoa)
+ax1.plot('C7', data = convQL)
+ax1.plot('C7', data = convBoa)
 ax1.title.set_text('Cuboid')
 
-ax2.plot('CS5', data = convQL)
-ax2.plot('CS5', data = convBoa)
+ax2.plot('C5', data = convQL)
+ax2.plot('C5', data = convBoa)
 ax2.title.set_text('Heel')
 plt.tight_layout()
 plt.legend(['Quick Lace','BOA'])
 
 f, (ax0, ax1) = plt.subplots(1,2)
-ax0.plot('CS1', data = convQL)
-ax0.plot('CS1', data = convBoa)
+ax0.plot('C1', data = convQL)
+ax0.plot('C1', data = convBoa)
 ax0.title.set_text('5th MTP')
 
-ax1.plot('CS4', data = convQL)
-ax1.plot('CS4', data = convBoa)
+ax1.plot('C4', data = convQL)
+ax1.plot('C4', data = convBoa)
 ax1.title.set_text('Navicular')
 plt.tight_layout()
 plt.legend(['Quick Lace','BOA'])
