@@ -52,96 +52,85 @@ def convLeftVals(data, calData):
     return convValues
 
 # Read in files
-fPath = 'C:/Users/Daniel.Feeney/Dropbox (Boa)/EndurancePerformance/SalomonQuicklace_Aug2020/Joe_Pressure_Data/Sensoria/'
-fPath = 'C:/Users/Daniel.Feeney/Dropbox (Boa)/EndurancePerformance/SalomonQuicklace_Aug2020/Sean_Pressure_Data/'
-# Workwear Study
-fPath = 'C:/Users/Daniel.Feeney/Dropbox (Boa)/Hike Work Research/Data/Sept20_Protocol/Pressures/'
-# Field Run Study
-fPath = 'C:/Users/Daniel.Feeney/Dropbox (Boa)/EndurancePerformance/SalomonQuicklace_Aug2020/FieldTest/'
-
+fPath = 'C:/Users/Daniel.Feeney/Dropbox (Boa)/GolfPerformance/BOA_Aug2020/Pressures/'
 entries = os.listdir(fPath)
 
 # Import data. Hard coded for now
-calFile = entries[6]
+calFile = entries[1]
 cal = pd.read_csv(fPath+calFile,sep=',', skiprows = 19, header = 0)
 
-BOAfile = entries[3]
-boa = pd.read_csv(fPath+BOAfile,sep=',', skiprows = 19, header = 0)
+AP = entries[0]
+APcal = pd.read_csv(fPath+AP,sep=',', skiprows = 19, header = 0)
 
-qlFile = entries[4]
-qlFile = pd.read_csv(fPath+qlFile,sep=',', skiprows = 19, header = 0)
+lace = entries[2]
+laceCal = pd.read_csv(fPath+lace,sep=',', skiprows = 19, header = 0)
 
-#convBoa = boa
-#convQL = qlFile
+LR = entries[4]
+LRcal = pd.read_csv(fPath+LR,sep=',', skiprows = 19, header = 0)
+
+monopanel = entries[3]
+monopanelCal = pd.read_csv(fPath+monopanel,sep=',', skiprows = 19, header = 0)
 
 # Use dynamic calibration from above
-convQL = convLeftVals(qlFile, cal)
-convBoa = convLeftVals(boa, cal)
+APcal = convLeftVals(APcal, cal)
+LRcal = convLeftVals(LRcal, cal)
+laceCal = convLeftVals(laceCal, cal)
+monopanelCal = convLeftVals(monopanelCal, cal)
 
-# Generic function to calculate peaks
-def avgPeaks(inputCol, ht, dist):
-    x = np.array(inputCol)
-    peaks, _ = find_peaks(x.flatten(), height=ht, distance = dist)
-    return x[peaks].mean()
-
-# find peaks for navicular, cuboid, and heel
-buckleNav = avgPeaks(np.array(convQL[['C3']]).flatten(), 10, 30)
-boaNav = avgPeaks(convBoa[['C3']], 10, 30)
-
-find_peaks(np.array(convQL[['C3']]).flatten())
-#buckleCub = avgPeaks(convBuckles[['C7']], 25, 30)
-#boaCub = avgPeaks(convBoa[['C7']], 45, 30)
-
-#buckleHeel = avgPeaks(convBuckles[['C5']], 290, 30)
-#boaHeel = avgPeaks(convBoa[['C5']], 290, 30)
-        
-#[boaNav, boaCub, boaHeel]
-#[buckleNav, buckleCub, buckleHeel]
-## Optional plotting below to find cutoffs    
-#plt.plot(convBuckles[['C3']])
-#plt.plot(peaks, x[peaks], "x")
-#plt.plot(np.zeros_like(x), "--", color="gray")
-#plt.show()
-
-
+#### plotting ####
 #order of sensors 0: 'Tibia', 1: '5th Met', 2: 'M Malleolus', 3:'Navicular', 4:'1st Met', 5:'Calcneus', 6:'L. Malleolus', 7:'Cuboid'
-# Make plots
 f, (ax0, ax1, ax2) = plt.subplots(1,3)
-ax0.plot('C0', data = convQL)
-ax0.plot('C0', data = convBoa)
+ax0.plot('C0', data = laceCal)
+ax0.plot('C0', data = LRcal)
+ax0.plot('C0', data = APcal)
+ax0.plot('C0', data = monopanelCal)
 ax0.title.set_text('L 5th Ray')
 
-ax1.plot('C2', data = convQL)
-ax1.plot('C2', data = convBoa)
+ax1.plot('C2', data = laceCal)
+ax1.plot('C2', data = LRcal)
+ax1.plot('C2', data = APcal)
+ax1.plot('C2', data = monopanelCal)
 ax1.title.set_text('5th distal phalanx')
 
-ax2.plot('C6', data = convQL)
-ax2.plot('C6', data = convBoa)
+ax2.plot('C6', data = laceCal)
+ax2.plot('C6', data = LRcal)
+ax2.plot('C6', data = APcal)
+ax2.plot('C6', data = monopanelCal)
 ax2.title.set_text('1st distal phalanx')
 plt.tight_layout()
 
 f, (ax0, ax1, ax2) = plt.subplots(1,3)
-ax0.plot('C3', data = convQL)
-ax0.plot('C3', data = convBoa)
+ax0.plot('C3', data = laceCal)
+ax0.plot('C3', data = LRcal)
+ax0.plot('C3', data = APcal)
+ax0.plot('C3', data = monopanelCal)
 ax0.title.set_text('1st MTP')
 
-ax1.plot('C7', data = convQL)
-ax1.plot('C7', data = convBoa)
+ax1.plot('C7', data = laceCal)
+ax1.plot('C7', data = LRcal)
+ax1.plot('C7', data = APcal)
+ax1.plot('C7', data = monopanelCal)
 ax1.title.set_text('Cuboid')
 
-ax2.plot('C5', data = convQL)
-ax2.plot('C5', data = convBoa)
+ax2.plot('C5', data = laceCal)
+ax2.plot('C5', data = LRcal)
+ax2.plot('C5', data = APcal)
+ax2.plot('C5', data = monopanelCal)
 ax2.title.set_text('Heel')
 plt.tight_layout()
-plt.legend(['Lace','BOA'])
+plt.legend(['Lace','LR', 'AP', 'Mono'])
 
 f, (ax0, ax1) = plt.subplots(1,2)
-ax0.plot('C1', data = convQL)
-ax0.plot('C1', data = convBoa)
+ax0.plot('C1', data = laceCal)
+ax0.plot('C1', data = LRcal)
+ax0.plot('C1', data = APcal)
+ax0.plot('C1', data = monopanelCal)
 ax0.title.set_text('5th MTP')
 
-ax1.plot('C4', data = convQL)
-ax1.plot('C4', data = convBoa)
+ax1.plot('C4', data = laceCal)
+ax1.plot('C4', data = LRcal)
+ax1.plot('C4', data = APcal)
+ax1.plot('C4', data = monopanelCal)
 ax1.title.set_text('Navicular')
 plt.tight_layout()
-plt.legend(['Lace','BOA'])
+plt.legend(['Lace','LR', 'AP', 'Mono'])

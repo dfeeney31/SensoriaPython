@@ -1,5 +1,12 @@
 # -*- coding: utf-8 -*-
 """
+Created on Tue Oct  6 11:55:01 2020
+
+@author: Daniel.Feeney
+"""
+
+# -*- coding: utf-8 -*-
+"""
 Created on Fri Jul 17 08:59:43 2020
 
 @author: Daniel.Feeney
@@ -53,23 +60,26 @@ def convRightVals(data, calData):
     return convValues
 
 # Read in files
-fPath = 'C:/Users/Daniel.Feeney/Dropbox (Boa)/Snow Protocol/InLabPressures/SensoriaData/'
 fPath = 'C:/Users/Daniel.Feeney/Dropbox (Boa)/Snow Protocol/SnowboardPressures/'
 entries = os.listdir(fPath)
 
 # Import data. Hard coded for now
-BOAfile = entries[4]
-boa = pd.read_csv(fPath+BOAfile,sep=',', skiprows = 18, header = 0)
+BOAfile = entries[1]
+boa = pd.read_csv(fPath+BOAfile,sep=',', skiprows = 19, header = 0)
 
 calFname = entries[0]
 cal = pd.read_csv(fPath+calFname,sep=',', skiprows = 19, header = 0)
 
-buckleFname = entries[7]
-buckle = pd.read_csv(fPath+buckleFname,sep=',', skiprows = 18, header = 0)
+laceFname = entries[2]
+lace = pd.read_csv(fPath+laceFname,sep=',', skiprows = 19, header = 0)
+
+qlFname = entries[3]
+ql = pd.read_csv(fPath+qlFname,sep=',', skiprows = 19, header = 0)
 
 # Use dynamic calibration from above
-convBuckles = convRightVals(buckle, cal)
+convLace = convRightVals(lace, cal)
 convBoa = convRightVals(boa, cal)
+convQL = convRightVals(ql, cal)
 
 # Generic function to calculate peaks
 def avgPeaks(inputCol, ht, dist):
@@ -99,41 +109,50 @@ boaHeel = avgPeaks(convBoa[['C5']], 290, 30)
 #order of sensors 0: 'Tibia', 1: '5th Met', 2: 'M Malleolus', 3:'Navicular', 4:'1st Met', 5:'Calcneus', 6:'L. Malleolus', 7:'Cuboid'
 # Make plots
 f, (ax0, ax1, ax2) = plt.subplots(1,3)
-ax0.plot('C0', data = convBuckles)
+ax0.plot('C0', data = convLace)
 ax0.plot('C0', data = convBoa)
+ax0.plot('C0', data = convQL)
 ax0.title.set_text('Tibia')
 
-ax1.plot('C2', data = convBuckles)
+ax1.plot('C2', data = convLace)
 ax1.plot('C2', data = convBoa)
+ax1.plot('C2', data = convQL)
 ax1.title.set_text('Medial Malleolus')
 
-ax2.plot('C6', data = convBuckles)
+ax2.plot('C6', data = convLace)
 ax2.plot('C6', data = convBoa)
+ax2.plot('C6', data = convQL)
 ax2.title.set_text('Lateral Malleolus')
 plt.tight_layout()
 
 f, (ax0, ax1, ax2) = plt.subplots(1,3)
-ax0.plot('C3', data = convBuckles)
+ax0.plot('C3', data = convLace)
 ax0.plot('C3', data = convBoa)
+ax0.plot('C3', data = convQL)
 ax0.title.set_text('Navicular')
 
-ax1.plot('C7', data = convBuckles)
+ax1.plot('C7', data = convLace)
 ax1.plot('C7', data = convBoa)
+ax1.plot('C7', data = convQL)
 ax1.title.set_text('Cuboid')
 
-ax2.plot('C5', data = convBuckles)
+ax2.plot('C5', data = convLace)
 ax2.plot('C5', data = convBoa)
+ax2.plot('C5', data = convQL)
 ax2.title.set_text('Heel')
+ax2.set_ylim([0,1000])
 plt.tight_layout()
-plt.legend(['Buckles','BOA'])
+plt.legend(['Lace','BOA', 'SpeedLace'])
 
 f, (ax0, ax1) = plt.subplots(1,2)
-ax0.plot('C1', data = convBuckles)
+ax0.plot('C1', data = convLace)
 ax0.plot('C1', data = convBoa)
+ax0.plot('C1', data = convQL)
 ax0.title.set_text('5th Met')
 
-ax1.plot('C4', data = convBuckles)
+ax1.plot('C4', data = convLace)
 ax1.plot('C4', data = convBoa)
+ax1.plot('C4', data = convQL)
 ax1.title.set_text('1st Met')
 plt.tight_layout()
-plt.legend(['Buckles','BOA'])
+plt.legend(['Lace','BOA', 'SpeedLace'])
